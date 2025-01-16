@@ -1,20 +1,21 @@
+// Constants
 const url = document.URL
 const mytt = url.includes('mytischtennis.de')
 const clicktt = url.includes('click-tt.de')
 
 if (mytt) {
-    verband = url.split('/')
+    const verband = url.split('/')
     verband = verband[verband.length - 3].toUpperCase()
 } else if (clicktt) {
-    verband = url.split('.')[0].split('//')[1].toUpperCase()
-
+    const verband = url.split('.')[0].split('//')[1].toUpperCase()
 }
 
-lonlat = {
+const lonlat = {
     DTTB: [51, 10.5, 5], OHNE: [51, 10.5, 5], BATTV: [48, 8.3080, 7], BYTTV: [48, 12, 6], TTVB: [52.25, 12.33, 7], FTTB: [53.08, 8.81, 9], HATTV: [53.55, 10, 8], HETTV: [50.61, 9.03, 7], TTVMV: [53.77, 12.58, 7],
     TTVN: [52.64, 9, 7], PTTV: [49.95, 7.31, 7], RTTVR: [49.85, 8.03, 7], STTB: [49.38, 6.95, 8], TTVSA: [52, 11.7, 7], TTTV: [50.90, 11.04, 7], WTTV: [51.96, 7.64, 7], TTBW: [48.76, 8.24, 7]
 }
 
+// Tabellendaten extrahieren - click-tt.de
 function buildTableDataClickTT() {
     const tbody = document.querySelector("table.result-set").getElementsByTagName("tbody")[0];
     var rows = Array.from(tbody.getElementsByTagName("tr"))
@@ -52,6 +53,7 @@ function buildTableDataClickTT() {
     return result
 }
 
+// Tabellendaten extrahieren - mytischtennis.de
 function buildTableDataMyTT() {
     const tbody = document.getElementsByClassName("table table-mytt table-striped table-bordered table-mini-xs table-mini-sm table-mini-md")[0].getElementsByTagName("tbody")[0]
     var rows = Array.from(tbody.getElementsByTagName("tr"))
@@ -91,10 +93,12 @@ function buildTableDataMyTT() {
     return result;
 }
 
+// Extension Div
 const extDiv = document.createElement("div");
 extDiv.setAttribute('id', 'extension');
 extDiv.style.border = "2px solid black";
 
+// Karten Div
 const mapDiv = document.createElement("div");
 mapDiv.setAttribute('id', 'map')
 
@@ -185,7 +189,7 @@ noVerband.addEventListener("change", () => {
     updateMarkers()
 })
 
-// Make list
+// Karte
 
 var map = L.map('map').setView([lonlat[verband][0], [lonlat[verband][1]]], lonlat[verband][2]);
 
@@ -194,11 +198,11 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
+// Koordinaten generieren
 
 addCoords()
 
-// Adds markers
-
+// Funktion, um Marker zu erstellen
 var markerGroup = L.layerGroup().addTo(map)
 function locationMarker(loc) {
 
@@ -229,6 +233,7 @@ function locationMarker(loc) {
 
 }
 
+// Löscht alle Marker und setzt sie neu
 function updateMarkers() {
 
     markerGroup.clearLayers()
@@ -237,9 +242,9 @@ function updateMarkers() {
         locationMarker(loc)
     })
 
-
 }
 
+// Funktion zum Koordinaten generieren mithilfe von photon und OpenStreetMap
 function addCoords(index) {
     if (index === undefined) index = 0;
     loc = locs[index]
