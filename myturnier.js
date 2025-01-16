@@ -29,13 +29,15 @@ function buildTableDataClickTT() {
             link: values[1].getElementsByTagName("a")[0].getAttribute("href")
         }
 
-        region = values[2].innerText
+        region = {
+            name: values[2].innerText
+        }
 
         list = []
         if (result.has(region)) {
             list = result.get(region)
         }
-        if (region) {
+        if (region.name) {
             list.push(tournament)
             result.set(region, list)
         }
@@ -48,9 +50,10 @@ function buildTableDataMyTT() {
     const tbody = document.getElementsByClassName("table table-mytt table-striped table-bordered table-mini-xs table-mini-sm table-mini-md")[0].getElementsByTagName("tbody")[0]
     var rows = Array.from(tbody.getElementsByTagName("tr"))
 
+    // Abgesagte Spiele entfernen
     rows = rows.filter((row) => row.getElementsByTagName("td")[0].getElementsByClassName("label label-danger")[0] === undefined)
 
-    result = new Map()
+    result = []
     rows.forEach((row) => {
         values = row.getElementsByTagName("td")
 
@@ -60,15 +63,21 @@ function buildTableDataMyTT() {
             link: values[2].getElementsByTagName("strong")[0].getElementsByTagName("a")[0].getAttribute("href")
         }
 
-        region = values[3].innerText
+        loc = { name: values[3].innerText, lon: 0, lat: 0, tournaments: [] }
 
-        list = []
-        if (result.has(region)) {
-            list = result.get(region)
-        }
-        if (region) {
-            list.push(tournament)
-            result.set(region, list)
+        tournaments = []
+
+        var found = false
+        result.forEach((currentLoc) => {
+            if (currentLoc.name == loc.name) {
+                currentLoc.tournaments.push(tournament)
+                found = true
+            }
+        })
+
+        if (!found && loc.name) {
+            loc.tournaments.push(tournament)
+            result.push(loc)
         }
 
     })
@@ -84,7 +93,7 @@ extDiv.style.border = "2px solid black";
 
 const mapDiv = document.createElement("div");
 mapDiv.setAttribute('id', 'map')
-mapDiv.style.border = "1px solid black"
+
 
 if (url.includes("mytischtennis.de")) {
 
@@ -93,23 +102,26 @@ if (url.includes("mytischtennis.de")) {
 
     document.getElementById("left-col").appendChild(extDiv);
 
-    map = buildTableDataMyTT()
+    locs = buildTableDataMyTT()
 
     mapDiv.style.width = document.getElementById("left-col").style.width
     mapDiv.style.height = "60vh"
 
+
+
 } else if (url.includes("click-tt.de")) {
 
-    extDiv.style.width = document.getElementById("content-row2").style.width
-    extDiv.style.height = "55vh"
+    extDiv.style.width = "25vw"
+    extDiv.style.height = "50vh"
 
-    document.getElementById("left-col").appendChild(extDiv);
+    extDiv.style.position = "absolute"
+    extDiv.style.left = "45vw"
+    extDiv.style.top = "20vh"
 
-    map = buildTableDataClickTT()
+    document.getElementById("content-row2").appendChild(extDiv);
 
-    mapDiv.style.position = "absolute"
-    mapDiv.style.left = "45vw"
-    mapDiv.style.top = "20vh"
+    locs = buildTableDataClickTT()
+
     mapDiv.style.width = "25vw"
     mapDiv.style.height = "45vh"
 
@@ -117,7 +129,71 @@ if (url.includes("mytischtennis.de")) {
 
 document.getElementById("extension").appendChild(mapDiv);
 
-regions = map.entries().toArray()
+// Settings
+// Nur Races, Keine Races, Turniere, die vom Verband organisert werden
+
+const noVerband = document.createElement("input")
+noVerband.setAttribute('type', 'checkbox')
+noVerband.setAttribute('id', 'noVerband')
+noVerband.setAttribute('checked', 'true')
+const noVerbandLabel = document.createElement("label")
+noVerbandLabel.setAttribute('for', 'noVerband')
+noVerbandLabel.innerText = "Keine vom Verband organisierten Turniere"
+
+document.getElementById("extension").appendChild(noVerband);
+document.getElementById("extension").appendChild(noVerbandLabel);
+
+const race = document.createElement("input")
+if (url.includes("mytischtennis.de")) {
+
+    document.getElementById("extension").appendChild(document.createElement("br"))
+
+    
+    race.setAttribute('type', 'checkbox')
+    race.setAttribute('id', 'races')
+    const raceLabel = document.createElement("label")
+    raceLabel.setAttribute('for', 'races')
+    raceLabel.innerText = "Nur Races"
+
+    document.getElementById("extension").appendChild(race);
+    document.getElementById("extension").appendChild(raceLabel);
+
+    document.getElementById("extension").appendChild(document.createElement("br"))
+
+    const norace = document.createElement("input")
+    norace.setAttribute('type', 'checkbox')
+    norace.setAttribute('id', 'noraces')
+    const noraceLabel = document.createElement("label")
+    noraceLabel.setAttribute('for', 'noraces')
+    noraceLabel.innerText = "Keine Races"
+
+    document.getElementById("extension").appendChild(norace);
+    document.getElementById("extension").appendChild(noraceLabel);
+
+    // Events
+
+    race.addEventListener("change", () => {
+        if (race.checked) {
+            norace.checked = false;
+            noVerband.checked = false;
+        }
+        updateMarkers()
+    })
+
+    norace.addEventListener("change", () => {
+        if (norace.checked) {
+            race.checked = false;
+        }
+        updateMarkers()
+    })
+}
+
+noVerband.addEventListener("change", () => {
+    if(noVerband.checked && url.includes('mytischtennis.de')) race.checked = false;
+    updateMarkers()
+})
+
+// Make list
 
 var map = L.map('map').setView([lonlat[verband][0], [lonlat[verband][1]]], lonlat[verband][2]);
 
@@ -126,37 +202,75 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-function addNextRegion(regions, index) {
-    r = regions[index]
-    region = r[0]
-    region = region.replace('/', ' ')
-    region = region.replace('OT', '')
-    region = region.split('|')[0]
-    tournaments = r[1]
 
-    fetch('https://photon.komoot.io/api/?q=' + region + ", Germany" + '&limit=1&lat=' + lonlat[verband][0] + '&lon=' + lonlat[verband][1])
-        .then(response => response.json())
-        .then(data => {
-            if (data.features !== undefined && data.features[0] !== undefined) {
-                var marker = L.marker([data.features[0].geometry.coordinates[1], data.features[0].geometry.coordinates[0]]).addTo(map);
+addCoords()
 
-                popupText = ""
-
-                tournaments.forEach((t) => {
-
-                    popupText = popupText + "<a href=\"" + t.link + "\">" + t.name + "</a><br><p style=\"margin: 0 0 0 0;\">" + t.date + "</p></br>"
-                })
-
-                marker.bindPopup(popupText)
+// Adds markers
 
 
-            }
+var markerGroup = L.layerGroup().addTo(map)
+function locationMarker(loc) {
 
-            if (index + 1 < regions.length) setTimeout(function () { addNextRegion(regions, index + 1) }, 1000)
-        })
+    var marker = L.marker([loc.lon, loc.lat]).addTo(markerGroup);
+
+    popupText = ""
+
+    // Settings
+    noRaces = url.includes('mytischtennis.de') ? document.getElementById("noraces").checked : false
+    justRaces = url.includes('mytischtennis.de') ? document.getElementById("races").checked : false
+    noChampionships = document.getElementById("noVerband").checked
+
+    loc.tournaments.forEach((t) => {
+        if ((!noRaces || !t.name.includes('Race')) &&
+            (!justRaces || t.name.includes('Race')) &&
+            (!noChampionships || (!t.name.toLowerCase().includes('verband') && !t.name.toLowerCase().includes('individualmeisterschaft') && !t.name.toLowerCase().includes('ranglisten')))) {
+
+            popupText = popupText + "<a href=\"" + t.link + "\">" + t.name + "</a><br><p style=\"margin: 0 0 0 0;\">" + t.date + "</p></br>"
+
+        }
+    })
+
+    if (popupText) {
+        popupText = "<h3 style=\"margin: 0 0 0 0;\">" + loc.name + "</h3></br>" + popupText
+        marker.bindPopup(popupText)
+    } else marker.remove()
 
 }
 
-addNextRegion(regions, 0)
+function updateMarkers() {
+    if (coordsLoaded) {
+        markerGroup.clearLayers()
 
+        locs.forEach((loc) => {
+            locationMarker(loc)
+        })
 
+    }
+}
+
+var coordsLoaded = false;
+function addCoords(index) {
+    if (index === undefined) index = 0;
+    loc = locs[index]
+
+    locName = loc.name.replace('/', ' ').replace('OT', '').split('|')[0]
+
+    fetch('https://photon.komoot.io/api/?q=' + locName + ", Germany") // + '&limit=1&lat=' + lonlat[verband][0] + '&lon=' + lonlat[verband][1]
+        .then(response => response.json())
+        .then(data => {
+            if (data.features !== undefined && data.features[0] !== undefined) {
+
+                loc.lon = data.features[0].geometry.coordinates[1]
+                loc.lat = data.features[0].geometry.coordinates[0]
+
+                locationMarker(loc)
+            }
+
+            if (index + 1 < locs.length) {
+                setTimeout(function () { addCoords(index + 1) }, 1000)
+            } else {
+                coordsLoaded = true;
+            }
+        })
+
+}
