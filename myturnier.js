@@ -31,7 +31,7 @@ function buildTableDataClickTT() {
             link: values[1].getElementsByTagName("a")[0].getAttribute("href")
         }
 
-        loc = { name: values[2].innerText, lon: 0, lat: 0, tournaments: [] }
+        loc = { name: values[2].innerText, lon: 999, lat: 999, tournaments: [] }
 
         tournaments = []
 
@@ -69,7 +69,7 @@ function buildTableDataMyTT() {
             link: values[2].getElementsByTagName("strong")[0].getElementsByTagName("a")[0].getAttribute("href")
         }
 
-        loc = { name: values[3].innerText, lon: 0, lat: 0, tournaments: [] }
+        loc = { name: values[3].innerText, lon: 999, lat: 999, tournaments: [] }
 
         tournaments = []
 
@@ -217,6 +217,7 @@ addCoords()
 var markerGroup = L.layerGroup().addTo(map)
 function locationMarker(loc) {
 
+    if (loc.lon == 500 || loc.lat == 500) return
     var marker = L.marker([loc.lon, loc.lat]).addTo(markerGroup);
 
     popupText = ""
@@ -244,24 +245,24 @@ function locationMarker(loc) {
 }
 
 function updateMarkers() {
-    if (coordsLoaded) {
-        markerGroup.clearLayers()
 
-        locs.forEach((loc) => {
-            locationMarker(loc)
-        })
+    markerGroup.clearLayers()
 
-    }
+    locs.forEach((loc) => {
+        locationMarker(loc)
+    })
+
+
 }
 
-var coordsLoaded = false;
+
 function addCoords(index) {
     if (index === undefined) index = 0;
     loc = locs[index]
 
     locName = loc.name.replace('/', ' ').replace('OT', '').split('|')[0]
 
-    fetch('https://photon.komoot.io/api/?q=' + locName + ", Germany") // + '&limit=1&lat=' + lonlat[verband][0] + '&lon=' + lonlat[verband][1]
+    fetch('https://photon.komoot.io/api/?q=' + locName + ", Germany")
         .then(response => response.json())
         .then(data => {
             if (data.features !== undefined && data.features[0] !== undefined) {
@@ -274,8 +275,6 @@ function addCoords(index) {
 
             if (index + 1 < locs.length) {
                 setTimeout(function () { addCoords(index + 1) }, 1000)
-            } else {
-                coordsLoaded = true;
             }
         })
 
