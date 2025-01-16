@@ -204,10 +204,19 @@ addCoords()
 
 // Funktion, um Marker zu erstellen
 var markerGroup = L.layerGroup().addTo(map)
+var icon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/Leaflet/Leaflet/refs/heads/main/dist/images/marker-icon.png',
+    shadowUrl: 'https://raw.githubusercontent.com/Leaflet/Leaflet/refs/heads/main/dist/images/marker-shadow.png',
+    iconSize: [25, 41],
+    shadowSize: [41, 41],
+    iconAnchor: [12, 40],
+    shadowAnchor: [12, 40],
+    popupAnchor: [0, -35]
+})
 function locationMarker(loc) {
 
     if (loc.lon == 500 || loc.lat == 500) return
-    var marker = L.marker([loc.lon, loc.lat]).addTo(markerGroup);
+    var marker = L.marker([loc.lon, loc.lat], { icon: icon }).addTo(markerGroup);
 
     popupText = ""
 

@@ -1,5 +1,5 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
     "name": "MyTurnier",
     "author": "Linas tom Suden",
     "version": "1.0",
@@ -8,8 +8,7 @@
         "48": "icons/icon-48.png"
     },
     "permissions": [
-        "activeTab",
-        "<all_urls>"
+        "activeTab"
     ],
     "content_scripts": [
         {
@@ -25,9 +24,5 @@
                 "lib/leaflet/leaflet.css"
             ]
         }
-    ],
-    "web_accessible_resources": [
-        "lib/leaflet/images/*"
-    ],
-    "content_security_policy": "script-src 'self'; object-src 'self'; connect-src https://nominatim.openstreetmap.org https://cors-anywhere.herokuapp.com"
+    ]
 }
