@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "MyTurnier",
-    "author": "Linas tom Suden",
+    "author": "linas_ts",
     "version": "1.0",
     "description": "Eine Browser-Extension die zu den Turnierkalendern auf den Websiten click-tt.de und mytischtennis.de eine interaktive Karte hinzufügt.",
     "icons": {
