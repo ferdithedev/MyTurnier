@@ -95,42 +95,29 @@ const extDiv = document.createElement("div");
 extDiv.setAttribute('id', 'extension');
 extDiv.style.border = "2px solid black";
 
-
-
 const mapDiv = document.createElement("div");
 mapDiv.setAttribute('id', 'map')
 
 
 if (mytt) {
 
-    extDiv.style.width = document.getElementById("left-col").style.width
-    extDiv.style.height = "70vh"
+    extDiv.setAttribute('class', 'mytt')
 
     document.getElementById("left-col").appendChild(extDiv);
 
     locs = buildTableDataMyTT()
 
-    mapDiv.style.width = document.getElementById("left-col").style.width
     mapDiv.style.height = "60vh"
-
-
 
 } else if (clicktt) {
 
-    extDiv.style.width = "25vw"
-    extDiv.style.height = "50vh"
-
-    extDiv.style.position = "absolute"
-    extDiv.style.left = "45vw"
-    extDiv.style.top = "20vh"
+    extDiv.setAttribute('class', 'clicktt')
 
     document.getElementById("content-row2").appendChild(extDiv);
 
     locs = buildTableDataClickTT()
 
-    mapDiv.style.width = "25vw"
     mapDiv.style.height = "45vh"
-
 }
 
 document.getElementById("extension").appendChild(mapDiv);
@@ -153,7 +140,6 @@ const race = document.createElement("input")
 if (mytt) {
 
     document.getElementById("extension").appendChild(document.createElement("br"))
-
 
     race.setAttribute('type', 'checkbox')
     race.setAttribute('id', 'races')
@@ -213,7 +199,6 @@ addCoords()
 
 // Adds markers
 
-
 var markerGroup = L.layerGroup().addTo(map)
 function locationMarker(loc) {
 
@@ -254,7 +239,6 @@ function updateMarkers() {
 
 
 }
-
 
 function addCoords(index) {
     if (index === undefined) index = 0;
