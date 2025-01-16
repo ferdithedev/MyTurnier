@@ -1,6 +1,6 @@
 # MyTurnier
 ## Funktionen
-Das Addon zeigt auf den Seiten der Turnierkalender von [mytischtennis.de](https://www.mytischtennis.de/) und [click-tt.de](https://dttb.click-tt.de/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/home) eine interaktive
+Das Addon fügt auf den Seiten der Turnierkalender von [mytischtennis.de](https://www.mytischtennis.de/) und [click-tt.de](https://dttb.click-tt.de/cgi-bin/WebObjects/nuLigaTTDE.woa/wa/home) eine interaktive
 Karte hinzu, die die Turniere der Seite anzeigt.
 
 <img src="https://github.com/user-attachments/assets/e90bdb63-3811-4aae-ab1c-379759aceef0" alt="drawing" width="300"/>
