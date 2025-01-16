@@ -4,10 +4,10 @@ const mytt = url.includes('mytischtennis.de')
 const clicktt = url.includes('click-tt.de')
 
 if (mytt) {
-    const verband = url.split('/')
+    verband = url.split('/')
     verband = verband[verband.length - 3].toUpperCase()
 } else if (clicktt) {
-    const verband = url.split('.')[0].split('//')[1].toUpperCase()
+    verband = url.split('.')[0].split('//')[1].toUpperCase()
 }
 
 const lonlat = {
