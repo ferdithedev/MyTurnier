@@ -1,9 +1,11 @@
 const url = document.URL
+const mytt = url.includes('mytischtennis.de')
+const clicktt = url.includes('click-tt.de')
 
-if (url.includes('mytischtennis.de')) {
+if (mytt) {
     verband = url.split('/')
     verband = verband[verband.length - 3].toUpperCase()
-} else if (url.includes('click-tt.de')) {
+} else if (clicktt) {
     verband = url.split('.')[0].split('//')[1].toUpperCase()
 
 }
@@ -18,7 +20,7 @@ function buildTableDataClickTT() {
     var rows = Array.from(tbody.getElementsByTagName("tr"))
     rows.shift()
 
-    result = new Map()
+    result = []
 
     rows.forEach((row) => {
         values = row.getElementsByTagName("td")
@@ -29,17 +31,21 @@ function buildTableDataClickTT() {
             link: values[1].getElementsByTagName("a")[0].getAttribute("href")
         }
 
-        region = {
-            name: values[2].innerText
-        }
+        loc = { name: values[2].innerText, lon: 0, lat: 0, tournaments: [] }
 
-        list = []
-        if (result.has(region)) {
-            list = result.get(region)
-        }
-        if (region.name) {
-            list.push(tournament)
-            result.set(region, list)
+        tournaments = []
+
+        var found = false
+        result.forEach((currentLoc) => {
+            if (currentLoc.name == loc.name) {
+                currentLoc.tournaments.push(tournament)
+                found = true
+            }
+        })
+
+        if (!found && loc.name) {
+            loc.tournaments.push(tournament)
+            result.push(loc)
         }
     });
 
@@ -95,7 +101,7 @@ const mapDiv = document.createElement("div");
 mapDiv.setAttribute('id', 'map')
 
 
-if (url.includes("mytischtennis.de")) {
+if (mytt) {
 
     extDiv.style.width = document.getElementById("left-col").style.width
     extDiv.style.height = "70vh"
@@ -109,7 +115,7 @@ if (url.includes("mytischtennis.de")) {
 
 
 
-} else if (url.includes("click-tt.de")) {
+} else if (clicktt) {
 
     extDiv.style.width = "25vw"
     extDiv.style.height = "50vh"
@@ -144,11 +150,11 @@ document.getElementById("extension").appendChild(noVerband);
 document.getElementById("extension").appendChild(noVerbandLabel);
 
 const race = document.createElement("input")
-if (url.includes("mytischtennis.de")) {
+if (mytt) {
 
     document.getElementById("extension").appendChild(document.createElement("br"))
 
-    
+
     race.setAttribute('type', 'checkbox')
     race.setAttribute('id', 'races')
     const raceLabel = document.createElement("label")
@@ -189,7 +195,7 @@ if (url.includes("mytischtennis.de")) {
 }
 
 noVerband.addEventListener("change", () => {
-    if(noVerband.checked && url.includes('mytischtennis.de')) race.checked = false;
+    if (noVerband.checked && mytt) race.checked = false;
     updateMarkers()
 })
 
@@ -216,8 +222,8 @@ function locationMarker(loc) {
     popupText = ""
 
     // Settings
-    noRaces = url.includes('mytischtennis.de') ? document.getElementById("noraces").checked : false
-    justRaces = url.includes('mytischtennis.de') ? document.getElementById("races").checked : false
+    noRaces = mytt ? document.getElementById("noraces").checked : false
+    justRaces = mytt ? document.getElementById("races").checked : false
     noChampionships = document.getElementById("noVerband").checked
 
     loc.tournaments.forEach((t) => {
